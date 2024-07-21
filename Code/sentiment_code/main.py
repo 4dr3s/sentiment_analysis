@@ -11,6 +11,7 @@ df = pd.json_normalize(data)
 tokenizer = BertTokenizer.from_pretrained("nlptown/bert-base-multilingual-uncased-sentiment")
 model = BertForSequenceClassification.from_pretrained("nlptown/bert-base-multilingual-uncased-sentiment")
 
+
 def predict_sentiment(comment):
     inputs = tokenizer.encode_plus(comment, return_tensors='pt', truncation=True)
 
