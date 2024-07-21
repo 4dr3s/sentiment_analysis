@@ -1,42 +1,30 @@
-from transformers import BertModel, BertTokenizer, AdamW, get_linear_schedule_with_warmup
-from sklearn.model_selection import train_test_split
-from torch import nn, optim
-from torch.utils.data import Dataset, DataLoader
-from textwrap import wrap
-import numpy as np
 import pandas as pd
+from transformers import BertTokenizer, BertForSequenceClassification
 import torch
 
-random_seed = 0
-max_len = 200
-batch_size = 16
-dataset_path = 'C:/Users/andre/Downloads/datos_threads.csv'
-n_classes = 2
+file_path = "C:/Users/andre/Downloads/datos_threads.csv"
+df = pd.read_csv(file_path, sep=";")
 
-np.random.seed(random_seed)
-torch.manual_seed(random_seed)
-device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+tokenizer = BertTokenizer.from_pretrained("nlptown/bert-base-multilingual-uncased-sentiment")
+model = BertForSequenceClassification.from_pretrained("nlptown/bert-base-multilingual-uncased-sentiment")
 
-df = pd.read_csv(dataset_path, sep=';')
-print(df)
+def predict_sentiment(comment):
+    inputs = tokenizer.encode_plus(comment, return_tensors='pt', truncation=True)
 
-pre_trained_model = 'dccuchile/bert-base-spanish-wwm-cased'
-tokenizer = BertTokenizer.from_pretrained(pre_trained_model)
+    with torch.no_grad():
+        outputs = model(**inputs)
+        predictions = torch.softmax(outputs.logits, dim=1)
 
-sample_txt = 'Estoy comiendo en familia'
-tokens = tokenizer.tokenize(sample_txt)
-tokens_ids = tokenizer.convert_tokens_to_ids(tokens)
-print('Frase: ', sample_txt)
-print('Tokens: ', tokens)
-print('Tokens numéricos: ', tokens_ids)
+    predicted_class = predictions.argmax().item()
 
-encoding = tokenizer.encode_plus(
-    sample_txt,
-    max_length=10,
-    truncation=True,
-    add_special_tokens=True,
-    return_token_type_ids=False,
-    pad_to_max_length=True,
-    return_attention_mask=True,
-    return_tensors='pt'
-)
+    sentiment_labels = ["Muy Negativo", "Negativo", "Neutral", "Positivo", "Muy Positivo"]
+    predicted_sentiment = sentiment_labels[predicted_class]
+
+    return predicted_sentiment
+
+df['sentimiento'] = df['description'].apply(predict_sentiment)
+
+output_file_path = "C:/Users/andre/Downloads/datos_threads_con_sentimiento.csv"
+df.to_csv(output_file_path, index=False, sep=";")
+
+print(f"Archivo guardado en: {output_file_path}")
