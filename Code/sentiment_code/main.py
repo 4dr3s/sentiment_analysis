@@ -26,6 +26,7 @@ def predict_sentiment(comment):
 
     return predicted_sentiment
 
+
 df['sentimiento'] = df['description'].apply(predict_sentiment)
 
 data_with_sentiment = df.to_dict(orient='records')
