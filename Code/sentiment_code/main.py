@@ -3,7 +3,7 @@ from transformers import BertTokenizer, BertForSequenceClassification
 import torch
 import json
 
-file_path = "C:/Users/andre/Downloads/datos_threads.json"
+file_path = "C:/Users/andre/Downloads/datos_tiktok2.json"
 with open(file_path, 'r', encoding='utf-8') as f:
     data = json.load(f)
 df = pd.json_normalize(data)
@@ -21,7 +21,7 @@ def predict_sentiment(comment):
 
     predicted_class = predictions.argmax().item()
 
-    sentiment_labels = ["Muy Negativo", "Negativo", "Neutral", "Positivo", "Muy Positivo"]
+    sentiment_labels = ["Negativo", "Negativo", "Neutral", "Positivo", "Positivo"]
     predicted_sentiment = sentiment_labels[predicted_class]
 
     return predicted_sentiment
@@ -31,7 +31,7 @@ df['sentimiento'] = df['description'].apply(predict_sentiment)
 
 data_with_sentiment = df.to_dict(orient='records')
 
-output_file_path = "C:/Users/andre/Downloads/datos_threads_con_sentimiento.json"
+output_file_path = "C:/Users/andre/Downloads/datos_tiktok2_con_sentimiento.json"
 with open(output_file_path, 'w', encoding='utf-8') as f:
     json.dump(data_with_sentiment, f, ensure_ascii=False, indent=4)
 
